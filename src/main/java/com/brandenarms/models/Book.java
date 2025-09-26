@@ -2,6 +2,13 @@ package com.brandenarms.models;
 
 import jakarta.persistence.*;
 
+enum ReadingStatus {
+    DONE,
+    To_Read,
+    Want_To_Read,
+    Did_Not_Finish
+}
+
 @Entity
 @Table(name = "books")
 public class Book {
@@ -14,6 +21,10 @@ public class Book {
 
     @Column(name = "author", nullable = false, unique = true)
     private String author = "";
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = true, unique = true)
+    private ReadingStatus status;
 
     @Column(name = "user", nullable = false, unique = true)
     private User user;
@@ -39,7 +50,7 @@ public class Book {
         return title;
     }
 
-    public void setTitle() {
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -51,7 +62,15 @@ public class Book {
         this.author = author;
     }
 
-    public User getuser() {
+    public ReadingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReadingStatus status) {
+        this.status = status;
+    }
+
+    public User getUser() {
         return user;
     }
 

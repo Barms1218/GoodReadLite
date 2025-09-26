@@ -59,5 +59,11 @@ public class User {
 
     public void addBook(Book book) {
         bookList.add(book);
+        book.setUser(this);
+    }
+
+    public void removeBook(Book book) {
+        bookList.remove(book);
+        book.setUser(null);
     }
 }
