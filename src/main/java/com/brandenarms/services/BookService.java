@@ -1,6 +1,7 @@
 package com.brandenarms.services;
 
 import com.brandenarms.repositories.BookRepository;
+import com.brandenarms.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,15 +12,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.lang.System.in;
-
 @Service
 @Transactional
 public class BookService {
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
 
     @Autowired
-    private BookRepository bookRepository;
-
+    public BookService(UserRepository userRepository, BookRepository bookRepository) {
+        this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
+    }
 
     public Book saveBook(Book book) {
         return bookRepository.save(book);
@@ -66,7 +69,7 @@ public class BookService {
             throw new RuntimeException("Book with that title does not exist.");
         }
 
-        bookRepository.deleteByTitle(title);
+         bookRepository.deleteByTitle(title);
     }
 
     public void deleteBook(Long bookId) {
@@ -84,7 +87,8 @@ public class BookService {
                 .orElseThrow(() -> new RuntimeException("Book does not exist."));
 
         User user;
-        user = book.getUser();
+        user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User does not exist."));
 
         if (!Objects.equals(user.getId(), userId)) {
             return;

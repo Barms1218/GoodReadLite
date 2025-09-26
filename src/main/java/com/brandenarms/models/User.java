@@ -14,7 +14,7 @@ public class User {
     @Column(name="username", nullable = false, unique = true)
     private String username = "";
 
-    @Column(name = "password_hash", nullable = false, unique = true)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash = "";
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 
 enum ReadingStatus {
     DONE,
-    To_Read,
-    Want_To_Read,
-    Did_Not_Finish
+    TO_READ,
+    WANT_TO_READ,
+    DID_NOT_FINISH
 }
 
 @Entity
@@ -19,14 +19,15 @@ public class Book {
     @Column(name = "title", nullable = false, unique = true)
     private String title = "";
 
-    @Column(name = "author", nullable = false, unique = true)
+    @Column(name = "author", nullable = false)
     private String author = "";
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = true, unique = true)
+    @Column(name = "status", nullable = true)
     private ReadingStatus status;
 
-    @Column(name = "user", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "userId", nullable = false, unique = true)
     private User user;
 
     public Book() {
