@@ -1,5 +1,6 @@
 package com.brandenarms.services;
 
+import com.brandenarms.dtos.PasswordChangeDTO;
 import com.brandenarms.dtos.UserResponseDTO;
 import com.brandenarms.models.User;
 import com.brandenarms.models.Book;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 //import org.springframework.security.crypto.bcrypt.BcryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,9 +26,6 @@ public class UserService {
         this.bookRepository = bookRepository;
     }
 
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
 
     public UserResponseDTO registerUser(String username, String password) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -37,7 +36,7 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(password);
         newUser.setPasswordHash(hashedPassword);
 
-        saveUser(newUser);
+        userRepository.save(newUser);
 
         return new UserResponseDTO(username);
     }
@@ -47,11 +46,22 @@ public class UserService {
         User existingUser = userRepository.findByUserName(username)
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
-        if (passwordEncoder.encode(password) == existingUser.getPasswordHash()) {
-            return true;
+        return Objects.equals(passwordEncoder.encode(password), existingUser.getPasswordHash());
+    }
+
+    public void changePassword(PasswordChangeDTO dto) {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        User user = userRepository.findByUserName(dto.getUsername())
+                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+
+        if (encoder.matches(dto.getNewPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("The password must not be the same as your previous password.");
         }
 
-        return false;
+        String hashedPassword = encoder.encode(dto.getNewPassword());
+        user.setPasswordHash(hashedPassword);
+
+        userRepository.save(user);
     }
 
     public Optional<User> findUserById(Long id) {
