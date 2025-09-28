@@ -41,12 +41,12 @@ public class UserService {
         return new UserResponseDTO(username);
     }
 
-    public boolean loginUser(String username, String password) {
+    public boolean loginUser(UserLoginDTO dto) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        User existingUser = userRepository.findByUserName(username)
+        User existingUser = userRepository.findByUserName(dto.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
-        return Objects.equals(passwordEncoder.encode(password), existingUser.getPasswordHash());
+        return passwordEncoder.matches(existingUser.getPasswordHash(), dto.getPassword());
     }
 
     public void changePassword(PasswordChangeDTO dto) {
@@ -54,11 +54,11 @@ public class UserService {
         User user = userRepository.findByUserName(dto.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username does not exist"));
 
-        if (encoder.matches(dto.getNewPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("The password must not be the same as your previous password.");
+        if (encoder.matches(dto.getOldPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Old password is incorrect.");
         }
 
-        String hashedPassword = encoder.encode(dto.getNewPassword());
+        String hashedPassword = encoder.encode(dto.getNewPasswordOne());
         user.setPasswordHash(hashedPassword);
 
         userRepository.save(user);
